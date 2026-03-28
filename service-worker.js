@@ -1,8 +1,10 @@
-const CACHE_NAME = 'exam-analyzer-v1';
+const CACHE_NAME = 'exam-analyzer-github-v1';
 const urlsToCache = [
+  './',
   './index.html',
   './manifest.json',
-  // لا نحتاج لتخزين مكتبات React لأنها تأتي من روابط CDN وتُخزن تلقائياً في المتصفح
+  './icon-192x192.png',
+  './icon-512x512.png'
 ];
 
 // تثبيت ملفات الكاش

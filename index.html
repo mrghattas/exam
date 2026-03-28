@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>محلل نتائج الطلاب الاحترافي | Exam Analyzer</title>
     
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="apple-touch-icon" href="./icon-192x192.png">
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -949,7 +952,6 @@
                   </div>
                 </div>
 
-                {/* --- التعديل هنا: حل مشكلة الأشرطة البيانية لمعامل الصعوبة والانحراف المعياري معاً --- */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm mt-8 print:break-before-page">
                   <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
                     <BarChart3 className="text-blue-500" />
@@ -970,7 +972,6 @@
                           {t('question')}
                         </div>
                         
-                        {/* شريط معامل الصعوبة */}
                         <div className="flex items-center gap-2 sm:gap-4">
                           <div className="w-24 text-xs font-semibold text-slate-500">{t('diffIndex')}</div>
                           <div className="flex-1 bg-slate-200 h-3 rounded-full overflow-hidden relative" dir="ltr">
@@ -987,7 +988,6 @@
                           </div>
                         </div>
 
-                        {/* شريط الانحراف المعياري */}
                         <div className="flex items-center gap-2 sm:gap-4">
                           <div className="w-24 text-xs font-semibold text-slate-500">{t('stdDev')}</div>
                           <div className="flex-1 bg-slate-200 h-3 rounded-full overflow-hidden relative" dir="ltr">
@@ -1088,9 +1088,6 @@
                               </span>
                             </div>
 
-                            {/* --- التعديل هنا: حل مشكلة اختفاء النص الطويل عند الطباعة --- */}
-                            
-                            {/* المربع الذي يظهر على الشاشة (للتعديل) */}
                             <textarea 
                               className="print:hidden w-full bg-transparent text-indigo-900 leading-relaxed text-sm p-3 -mx-3 rounded-xl border border-transparent hover:border-indigo-200 hover:bg-white focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 outline-none transition-all resize-y min-h-[5rem] block"
                               value={customInsights[q.id] !== undefined ? customInsights[q.id] : q.insight}
@@ -1102,7 +1099,6 @@
                               title="Edit your custom notes here"
                             />
 
-                            {/* المربع الذي يظهر فقط عند الطباعة (يتمدد ليحتوي كل النص بالكامل) */}
                             <div className="hidden print:block text-indigo-900 leading-relaxed text-sm mt-2 whitespace-pre-wrap text-justify">
                                {customInsights[q.id] !== undefined ? customInsights[q.id] : q.insight}
                             </div>
@@ -1259,5 +1255,19 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<ExamAnalyzer />);
     </script>
-</body>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                .then(registration => {
+                    console.log('تم تسجيل PWA بنجاح:', registration.scope);
+                })
+                .catch(error => {
+                    console.log('فشل تسجيل PWA:', error);
+                });
+            });
+        }
+    </script>
+    </body>
 </html>

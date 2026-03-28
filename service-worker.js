@@ -1,7 +1,8 @@
-const CACHE_NAME = 'exam-analyzer-github-v1';
+const CACHE_NAME = 'exam-analyzer-v2';
 const urlsToCache = [
   './',
   './index.html',
+  './app.html',
   './manifest.json',
   './icon-192x192.png',
   './icon-512x512.png'
@@ -23,9 +24,9 @@ self.addEventListener('fetch', event => {
     caches.match(event.request)
       .then(response => {
         if (response) {
-          return response; // إذا وجد الملف في الكاش، يعرضه
+          return response;
         }
-        return fetch(event.request); // إذا لم يجده، يطلبه من الإنترنت
+        return fetch(event.request);
       }
     )
   );

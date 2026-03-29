@@ -2,7 +2,7 @@ const CACHE_NAME = 'exam-analyzer-v2';
 const urlsToCache = [
   './',
   './index.html',
-  './app.html',
+  './Exam Analyzer.html',
   './manifest.json',
   './icon-192x192.png',
   './icon-512x512.png'

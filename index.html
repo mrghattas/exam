@@ -27,7 +27,6 @@
         }
 
         body {
-            /* خلفية متدرجة عصرية وناعمة جداً */
             background: linear-gradient(135deg, #e0e7ff 0%, #f5f3ff 50%, #eef2ff 100%);
             background-attachment: fixed;
             color: #1e293b;
@@ -39,6 +38,38 @@
             margin: 0;
             text-align: center;
             padding: 20px 15px;
+            position: relative;
+        }
+
+        /* ---------------- زر تغيير اللغة ---------------- */
+        .lang-switch-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(79, 70, 229, 0.2);
+            color: var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        /* ضبط موقع الزر عند تغيير اللغة للإنجليزية */
+        html[dir="ltr"] .lang-switch-btn {
+            left: auto;
+            right: 20px;
+        }
+
+        .lang-switch-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
         }
 
         /* ---------------- النافذة الترحيبية ---------------- */
@@ -74,33 +105,25 @@
             transform: translateY(30px);
         }
 
-        /* ---------------- الحاوية الرئيسية والتذييل (التأثير الزجاجي) ---------------- */
+        /* ---------------- الحاوية الرئيسية والتذييل ---------------- */
         .main-container, footer {
-            /* تأثير الزجاج (Glassmorphism) */
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.8);
             border-radius: 28px;
             width: 100%;
-            /* تحديد العرض ليكون متناسقاً ولا يتمدد بشكل مزعج على اللابتوب */
             max-width: 550px; 
             box-shadow: 0 15px 35px rgba(79, 70, 229, 0.05), 0 5px 15px rgba(0, 0, 0, 0.03);
         }
 
-        .main-container {
-            padding: 40px 25px;
-            margin-bottom: 20px;
-        }
+        .main-container { padding: 40px 25px; margin-bottom: 20px; margin-top: 40px; }
+        footer { padding: 25px; }
 
-        footer {
-            padding: 25px;
-        }
-
-        /* ---------------- قائمة التطبيقات (سطر واحد دائماً) ---------------- */
+        /* ---------------- قائمة التطبيقات ---------------- */
         .apps-list {
             display: flex;
-            flex-direction: column; /* يجعل التطبيقات تحت بعضها دائماً */
+            flex-direction: column;
             gap: 15px;
             margin-top: 25px;
             margin-bottom: 20px;
@@ -109,7 +132,7 @@
         .app-link {
             display: flex;
             align-items: center;
-            justify-content: flex-start; /* الأيقونة على اليمين */
+            justify-content: flex-start;
             gap: 15px;
             color: #1e293b;
             text-decoration: none;
@@ -122,6 +145,7 @@
             transition: all 0.3s ease;
             width: 100%;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+            text-align: start;
         }
 
         .app-link i {
@@ -135,6 +159,7 @@
             border-radius: 12px;
             font-size: 18px;
             transition: all 0.3s ease;
+            flex-shrink: 0;
         }
 
         .app-link:hover, .app-link:active {
@@ -143,7 +168,6 @@
             transform: translateY(-3px);
             box-shadow: 0 10px 20px rgba(79, 70, 229, 0.15);
         }
-
         .app-link:hover i, .app-link:active i {
             background: white;
             color: var(--primary-color);
@@ -163,11 +187,7 @@
             background: rgba(79, 70, 229, 0.05);
             transition: 0.3s;
         }
-        
-        .refresh-page-link:hover { 
-            background: #ef4444; 
-            color: white; 
-        }
+        .refresh-page-link:hover { background: #ef4444; color: white; }
 
         .btn-continue {
             background: var(--primary-color);
@@ -210,67 +230,62 @@
 </head>
 <body>
 
+    <button class="lang-switch-btn" onclick="toggleLanguage()">English</button>
+
     <div id="welcomeModal" class="modal-overlay">
         <div class="modal-content">
             <div style="background: #e0e7ff; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
                 <i class="fas fa-hand-sparkles" style="font-size: 32px; color: #4f46e5;"></i>
             </div>
-            <h2 style="margin: 0 0 10px; color: #1e293b; font-weight: 800;">أهلاً بك</h2>
-            <p style="color: #64748b; margin-bottom: 15px; line-height: 1.6; font-size: 15px;">
+            <h2 id="ui-welcome-title" style="margin: 0 0 10px; color: #1e293b; font-weight: 800;">أهلاً بك</h2>
+            <p id="ui-welcome-desc" style="color: #64748b; margin-bottom: 15px; line-height: 1.6; font-size: 15px;">
                 في <strong>بوابة برمجيات الغطاس</strong><br>يسعدنا تواصلك معنا دائماً
             </p>
             
-            <a href="https://api.whatsapp.com/send?phone=96896140181" target="_blank" class="intro-whatsapp">
-                <i class="fab fa-whatsapp" style="font-size: 20px; vertical-align: middle;"></i> 96140181
+            <a href="https://api.whatsapp.com/send?phone=96896140181" target="_blank" class="intro-whatsapp" dir="ltr">
+                <i class="fab fa-whatsapp" style="font-size: 20px; vertical-align: middle;"></i> +968 96140181
             </a>
             
-            <button onclick="closeModal()" class="btn-continue">متابعة للموقع</button>
+            <button id="ui-continue-btn" onclick="closeModal()" class="btn-continue">متابعة للموقع</button>
         </div>
     </div>
 
     <div class="main-container">
         <img src="https://cdn-icons-png.flaticon.com/512/3209/3209265.png" alt="Logo" class="portal-logo" style="width: 85px; margin-bottom: 10px; drop-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <h1 class="portal-title" style="color: #1e293b; font-size: 24px; font-weight: 800; margin: 0 0 5px;">بوابة برمجيات الغطاس</h1>
-
-
-
-
-        
-     
-       
-
-
+        <h1 id="ui-portal-title" style="color: #1e293b; font-size: 24px; font-weight: 800; margin: 0 0 5px;">بوابة برمجيات الغطاس</h1>
+		
+		
+		
+		
+		
         
         <div class="apps-list">
             
             <a href="#" onclick="updateAndEnter(event, './ExamAnalyzer.html')" class="app-link">
-                <i class="fas fa-chart-bar"></i> تطبيق تحليل نتائج الطلاب
+                <i class="fas fa-chart-bar"></i>
+                <span class="app-name" data-ar="تطبيق تحليل نتائج الطلاب" data-en="Student Results Analyzer">تطبيق تحليل نتائج الطلاب</span>
             </a>
+			
+			
+			
+			
+			
+			
+			
+			
 
-            
-
-
-
-            
-            
-            
             </div>
-        <a onclick="refreshPortal()" class="refresh-page-link">
+        <a id="ui-refresh-btn" onclick="refreshPortal()" class="refresh-page-link">
             <i class="fas fa-sync-alt"></i> مسح الذاكرة وتحديث البوابة
         </a>
-
-
-
-
-
         
         <p id="statusMsg" style="margin-top: 10px; font-size: 14px; font-weight: bold; color: #4f46e5; height: 18px;"></p>
     </div>
 
     <footer>
-        <div style="font-size: 13px; color: #64748b; font-weight: bold; margin-bottom: 5px;">تم التصميم والبرمجة من قبل</div>
-        <div class="footer-name">الأستاذ / محمد غطاس</div>
-        <div class="footer-role">معلم الرياضيات</div>
+        <div id="ui-footer-credit" style="font-size: 13px; color: #64748b; font-weight: bold; margin-bottom: 5px;">تم التصميم والبرمجة من قبل</div>
+        <div id="ui-footer-name" class="footer-name">الأستاذ / محمد غطاس</div>
+        <div id="ui-footer-role" class="footer-role">معلم الرياضيات</div>
         
         <div style="display: flex; justify-content: center; width: 100%;">
             <a href="https://api.whatsapp.com/send?phone=96896140181" class="whatsapp-badge" target="_blank" dir="ltr">
@@ -280,6 +295,78 @@
     </footer>
 
     <script>
+        // ==========================================
+        // نظام تعدد اللغات (الترجمة)
+        // ==========================================
+        let currentLang = localStorage.getItem('portalLang') || 'ar'; // عربي كلغة افتراضية
+
+        const translations = {
+            ar: {
+                "ui-welcome-title": "أهلاً بك",
+                "ui-welcome-desc": "في <strong>بوابة برمجيات الغطاس</strong><br>يسعدنا تواصلك معنا دائماً",
+                "ui-continue-btn": "متابعة للموقع",
+                "ui-portal-title": "بوابة برمجيات الغطاس",
+                "ui-refresh-btn": "<i class='fas fa-sync-alt'></i> مسح الذاكرة وتحديث البوابة",
+                "ui-footer-credit": "تم التصميم والبرمجة من قبل",
+                "ui-footer-name": "الأستاذ / محمد غطاس",
+                "ui-footer-role": "معلم الرياضيات",
+                "btn-lang": "English",
+                "msg-loading": "يتم الآن تحديث الذاكرة وجلب أحدث نسخة...",
+                "msg-refresh": "جاري مسح الذاكرة وتحديث البوابة...",
+                "msg-opening": "جاري فتح التطبيق..."
+            },
+            en: {
+                "ui-welcome-title": "Welcome",
+                "ui-welcome-desc": "To <strong>Al-Ghattas Software Portal</strong><br>We are always happy to connect",
+                "ui-continue-btn": "Continue to Portal",
+                "ui-portal-title": "Al-Ghattas Software Portal",
+                "ui-refresh-btn": "<i class='fas fa-sync-alt'></i> Clear Cache & Refresh",
+                "ui-footer-credit": "Designed & Programmed By",
+                "ui-footer-name": "Mr. Mohammed Al-Ghattas",
+                "ui-footer-role": "Mathematics Teacher",
+                "btn-lang": "عربي",
+                "msg-loading": "Updating memory & fetching latest version...",
+                "msg-refresh": "Clearing cache and refreshing portal...",
+                "msg-opening": "Opening App..."
+            }
+        };
+
+        function applyLanguage(lang) {
+            // تغيير اتجاه الصفحة
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            
+            // تغيير زر اللغة
+            document.querySelector('.lang-switch-btn').innerText = translations[lang]["btn-lang"];
+
+            // تغيير النصوص الأساسية
+            document.getElementById('ui-welcome-title').innerHTML = translations[lang]["ui-welcome-title"];
+            document.getElementById('ui-welcome-desc').innerHTML = translations[lang]["ui-welcome-desc"];
+            document.getElementById('ui-continue-btn').innerHTML = translations[lang]["ui-continue-btn"];
+            document.getElementById('ui-portal-title').innerHTML = translations[lang]["ui-portal-title"];
+            document.getElementById('ui-refresh-btn').innerHTML = translations[lang]["ui-refresh-btn"];
+            document.getElementById('ui-footer-credit').innerHTML = translations[lang]["ui-footer-credit"];
+            document.getElementById('ui-footer-name').innerHTML = translations[lang]["ui-footer-name"];
+            document.getElementById('ui-footer-role').innerHTML = translations[lang]["ui-footer-role"];
+
+            // تغيير أسماء التطبيقات من الكود مباشرة (data-ar / data-en)
+            document.querySelectorAll('.app-name').forEach(span => {
+                span.innerText = span.getAttribute(`data-${lang}`);
+            });
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('portalLang', currentLang); // حفظ اللغة
+            applyLanguage(currentLang);
+        }
+
+        // تطبيق اللغة المحفوظة عند فتح الصفحة
+        applyLanguage(currentLang);
+
+        // ==========================================
+        // دوال فتح التطبيقات ومسح الكاش
+        // ==========================================
         function closeModal() {
             document.getElementById('welcomeModal').classList.add('hidden');
         }
@@ -297,9 +384,12 @@
             link.style.pointerEvents = "none";
             link.style.background = "#4f46e5";
             link.style.color = "white";
-            link.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري فتح التطبيق...';
             
-            if (msg) msg.innerText = "يتم الآن تحديث الذاكرة وجلب أحدث نسخة...";
+            // استخدام الترجمة المناسبة للتحميل
+            const loadingText = translations[currentLang]["msg-opening"];
+            link.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
+            
+            if (msg) msg.innerText = translations[currentLang]["msg-loading"];
 
             await clearAllCaches();
             
@@ -312,7 +402,7 @@
             const msg = document.getElementById('statusMsg');
             if(msg) {
                 msg.style.color = "#ef4444"; 
-                msg.innerText = "جاري مسح الذاكرة وتحديث البوابة...";
+                msg.innerText = translations[currentLang]["msg-refresh"];
             }
             
             await clearAllCaches();
@@ -337,7 +427,7 @@
                     }
                 }
             } catch (e) {
-                console.error("خطأ في مسح الكاش:", e);
+                console.error("Cache Error:", e);
             }
         }
     </script>

@@ -7,6 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+
     <title>برمجيات الغطاس</title>
     
     <link rel="manifest" href="./manifest.json">
@@ -47,12 +48,26 @@
             font-weight: bold;
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+            margin-bottom: 15px; /* مسافة بين الأزرار */
+            width: 100%;
+            box-sizing: border-box;
         }
         .btn:hover {
             background-color: #4338ca;
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
         }
+        
+        /* تصميم زر التحديث الجديد */
+        .btn-update {
+            background-color: #ef4444; /* لون أحمر للتنبيه */
+            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+        }
+        .btn-update:hover {
+            background-color: #dc2626;
+            box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3);
+        }
+
         .install-hint {
             margin-top: 20px;
             font-size: 13px;
@@ -64,37 +79,55 @@
 
     <div class="container">
         <h1>مرحباً بك في برمجيات الغطاس </h1>
-          <h1> </h1>  <h1> </h1>
-          <h1> </h1>  <h1> </h1>
+        <br><br> <a href="./ExamAnalyzer.html" class="btn">دخول تطبيق تحليل نتائج الطلاب</a>
 
-        <a href="./ExamAnalyzer.html" class="btn">دخول تطبيق تحليل نتائج الطلاب </a>
-        
-        
+        <button id="forceUpdateBtn" class="btn btn-update">تحديث الموقع (مسح الذاكرة)</button>
 
     </div>
 
     <script>
+        // 1. كود تشغيل الـ Service Worker العادي
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                
-                // 👇👇👇 ⚠️ تذكير هام جداً عند التعديل ⚠️ 👇👇👇
-                // عندما تقوم بأي تعديل جديد في الموقع وتريد أن يظهر التعديل للزوار فوراً،
-                // يجب عليك تغيير الرقم في السطر التالي (مثلاً من v=1 إلى v=2 ثم v=3 وهكذا).
-                // هذا التغيير البسيط يجبر المتصفح على مسح الكاش القديم وتحديث الموقع!
-                // 👆👆👆 =================================== 👆👆👆
-                
-                navigator.serviceWorker.register('./service-worker.js?v=11')
+                navigator.serviceWorker.register('./service-worker.js')
                 .then(registration => {
                     console.log('تم التفعيل بنجاح واجهة الدخول:', registration.scope);
-                    
-                    // إجبار السيرفر ووركر على تحديث الكاش القديم
-                    registration.update();
                 })
                 .catch(error => {
                     console.log('فشل التفعيل:', error);
                 });
             });
         }
+
+        // 2. برمجة زر "تحديث الموقع" الجديد
+        document.getElementById('forceUpdateBtn').addEventListener('click', function() {
+            // تغيير نص الزر ليُعلم المستخدم أنه جاري التحديث
+            this.innerText = "جاري التحديث...";
+            this.style.opacity = "0.7";
+
+            // أ) مسح وإلغاء تسجيل الـ Service Worker القديم
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+
+            // ب) مسح الذاكرة المؤقتة (Cache) من المتصفح
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+
+            // ج) إعادة تحميل الصفحة إجبارياً بعد نصف ثانية للتأكد من مسح كل شيء
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 500);
+        });
     </script>
 </body>
 </html>

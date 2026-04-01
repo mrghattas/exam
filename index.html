@@ -2,133 +2,323 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
-    <title>برمجيات الغطاس</title>
+    <title>برمجيات الغطاس | بوابة التطبيقات</title>
     
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#4f46e5">
     
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        :root {
+            --primary-color: #4f46e5;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8fafc;
-            color: #333;
+            /* خلفية متدرجة عصرية وناعمة جداً */
+            background: linear-gradient(135deg, #e0e7ff 0%, #f5f3ff 50%, #eef2ff 100%);
+            background-attachment: fixed;
+            color: #1e293b;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             text-align: center;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            max-width: 500px;
-            width: 100%;
-        }
-        h1 { color: #1e293b; font-size: 24px; margin-bottom: 10px; }
-        p { color: #64748b; font-size: 16px; margin-bottom: 30px; line-height: 1.6; }
-        .btn {
-            display: inline-block;
-            background-color: #4f46e5;
-            color: white;
-            padding: 15px 30px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
-            margin-bottom: 15px; /* مسافة بين الأزرار */
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .btn:hover {
-            background-color: #4338ca;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
-        }
-        
-        /* تصميم زر التحديث الجديد */
-        .btn-update {
-            background-color: #ef4444; /* لون أحمر للتنبيه */
-            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
-        }
-        .btn-update:hover {
-            background-color: #dc2626;
-            box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3);
+            padding: 20px 15px;
         }
 
-        .install-hint {
-            margin-top: 20px;
-            font-size: 13px;
-            color: #94a3b8;
+        /* ---------------- النافذة الترحيبية ---------------- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.4s ease;
         }
+
+        .modal-content {
+            background: white;
+            padding: 35px 25px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 90%;
+            max-width: 380px;
+            transform: translateY(0);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal-overlay.hidden .modal-content {
+            transform: translateY(30px);
+        }
+
+        /* ---------------- الحاوية الرئيسية والتذييل (التأثير الزجاجي) ---------------- */
+        .main-container, footer {
+            /* تأثير الزجاج (Glassmorphism) */
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 28px;
+            width: 100%;
+            /* تحديد العرض ليكون متناسقاً ولا يتمدد بشكل مزعج على اللابتوب */
+            max-width: 550px; 
+            box-shadow: 0 15px 35px rgba(79, 70, 229, 0.05), 0 5px 15px rgba(0, 0, 0, 0.03);
+        }
+
+        .main-container {
+            padding: 40px 25px;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            padding: 25px;
+        }
+
+        /* ---------------- قائمة التطبيقات (سطر واحد دائماً) ---------------- */
+        .apps-list {
+            display: flex;
+            flex-direction: column; /* يجعل التطبيقات تحت بعضها دائماً */
+            gap: 15px;
+            margin-top: 25px;
+            margin-bottom: 20px;
+        }
+
+        .app-link {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; /* الأيقونة على اليمين */
+            gap: 15px;
+            color: #1e293b;
+            text-decoration: none;
+            font-size: 19px;
+            font-weight: 800;
+            padding: 18px 20px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 1);
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .app-link i {
+            background: var(--primary-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .app-link:hover, .app-link:active {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.15);
+        }
+
+        .app-link:hover i, .app-link:active i {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        /* ---------------- النصوص والأزرار ---------------- */
+        .refresh-page-link {
+            display: inline-block;
+            font-size: 15px;
+            font-weight: 800;
+            color: #4f46e5; 
+            text-decoration: none;
+            cursor: pointer;
+            margin-top: 10px;
+            padding: 8px 15px;
+            border-radius: 10px;
+            background: rgba(79, 70, 229, 0.05);
+            transition: 0.3s;
+        }
+        
+        .refresh-page-link:hover { 
+            background: #ef4444; 
+            color: white; 
+        }
+
+        .btn-continue {
+            background: var(--primary-color);
+            color: white;
+            padding: 14px 30px;
+            border-radius: 14px;
+            border: none;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 25px;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+            transition: 0.3s;
+        }
+        .btn-continue:hover { background: #4338ca; transform: translateY(-2px); }
+
+        .footer-name { font-size: 20px; color: #1e293b; font-weight: 800; margin: 5px 0; }
+        .footer-role { font-size: 14px; color: #64748b; margin-bottom: 20px; }
+
+        .whatsapp-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #25D366;
+            color: white;
+            padding: 14px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 17px;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.25);
+            width: 100%;
+        }
+        .whatsapp-badge:hover { background: #128C7E; transform: translateY(-2px); }
+        .intro-whatsapp { color: #25D366; font-weight: 700; text-decoration: none; font-size: 17px; display: block; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>مرحباً بك في برمجيات الغطاس </h1>
-        <br><br> <a href="./ExamAnalyzer.html" class="btn">دخول تطبيق تحليل الاختبارات</a>
-        
-
-        <button id="forceUpdateBtn" class="btn btn-update">تحديث الموقع (مسح الذاكرة)</button>
-
+    <div id="welcomeModal" class="modal-overlay">
+        <div class="modal-content">
+            <div style="background: #e0e7ff; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <i class="fas fa-hand-sparkles" style="font-size: 32px; color: #4f46e5;"></i>
+            </div>
+            <h2 style="margin: 0 0 10px; color: #1e293b; font-weight: 800;">أهلاً بك</h2>
+            <p style="color: #64748b; margin-bottom: 15px; line-height: 1.6; font-size: 15px;">
+                في <strong>بوابة برمجيات الغطاس</strong><br>يسعدنا تواصلك معنا دائماً
+            </p>
+            
+            <a href="https://api.whatsapp.com/send?phone=96896140181" target="_blank" class="intro-whatsapp">
+                <i class="fab fa-whatsapp" style="font-size: 20px; vertical-align: middle;"></i> 96140181
+            </a>
+            
+            <button onclick="closeModal()" class="btn-continue">متابعة للموقع</button>
+        </div>
     </div>
 
+    <div class="main-container">
+        <img src="https://cdn-icons-png.flaticon.com/512/3209/3209265.png" alt="Logo" class="portal-logo" style="width: 85px; margin-bottom: 10px; drop-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h1 class="portal-title" style="color: #1e293b; font-size: 24px; font-weight: 800; margin: 0 0 5px;">بوابة برمجيات الغطاس</h1>
+        
+        <div class="apps-list">
+            
+            <a href="#" onclick="updateAndEnter(event, './ExamAnalyzer.html')" class="app-link">
+                <i class="fas fa-chart-bar"></i> تطبيق تحليل نتائج الطلاب
+            </a>
+
+            </div>
+        <a onclick="refreshPortal()" class="refresh-page-link">
+            <i class="fas fa-sync-alt"></i> مسح الذاكرة وتحديث البوابة
+        </a>
+        
+        <p id="statusMsg" style="margin-top: 10px; font-size: 14px; font-weight: bold; color: #4f46e5; height: 18px;"></p>
+    </div>
+
+    <footer>
+        <div style="font-size: 13px; color: #64748b; font-weight: bold; margin-bottom: 5px;">تم التصميم والبرمجة من قبل</div>
+        <div class="footer-name">الأستاذ / محمد غطاس</div>
+        <div class="footer-role">معلم الرياضيات</div>
+        
+        <div style="display: flex; justify-content: center; width: 100%;">
+            <a href="https://api.whatsapp.com/send?phone=96896140181" class="whatsapp-badge" target="_blank" dir="ltr">
+                +968 96140181 <i class="fab fa-whatsapp" style="font-size: 24px;"></i>
+            </a>
+        </div>
+    </footer>
+
     <script>
-        // 1. كود تشغيل الـ Service Worker العادي
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js')
-                .then(registration => {
-                    console.log('تم التفعيل بنجاح واجهة الدخول:', registration.scope);
-                })
-                .catch(error => {
-                    console.log('فشل التفعيل:', error);
-                });
-            });
+        function closeModal() {
+            document.getElementById('welcomeModal').classList.add('hidden');
         }
 
-        // 2. برمجة زر "تحديث الموقع" الجديد
-        document.getElementById('forceUpdateBtn').addEventListener('click', function() {
-            // تغيير نص الزر ليُعلم المستخدم أنه جاري التحديث
-            this.innerText = "جاري التحديث...";
-            this.style.opacity = "0.7";
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./service-worker.js');
+        }
 
-            // أ) مسح وإلغاء تسجيل الـ Service Worker القديم
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for(let registration of registrations) {
-                        registration.unregister();
-                    }
-                });
-            }
+        async function updateAndEnter(event, targetUrl) {
+            event.preventDefault(); 
+            
+            const link = event.currentTarget;
+            const msg = document.getElementById('statusMsg');
+            
+            link.style.pointerEvents = "none";
+            link.style.background = "#4f46e5";
+            link.style.color = "white";
+            link.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري فتح التطبيق...';
+            
+            if (msg) msg.innerText = "يتم الآن تحديث الذاكرة وجلب أحدث نسخة...";
 
-            // ب) مسح الذاكرة المؤقتة (Cache) من المتصفح
-            if ('caches' in window) {
-                caches.keys().then(function(names) {
-                    for (let name of names) {
-                        caches.delete(name);
-                    }
-                });
-            }
-
-            // ج) إعادة تحميل الصفحة إجبارياً بعد نصف ثانية للتأكد من مسح كل شيء
+            await clearAllCaches();
+            
             setTimeout(() => {
-                window.location.reload(true);
-            }, 500);
-        });
+                window.location.href = targetUrl + "?v=" + Date.now();
+            }, 600);
+        }
+
+        async function refreshPortal() {
+            const msg = document.getElementById('statusMsg');
+            if(msg) {
+                msg.style.color = "#ef4444"; 
+                msg.innerText = "جاري مسح الذاكرة وتحديث البوابة...";
+            }
+            
+            await clearAllCaches();
+
+            setTimeout(() => {
+                window.location.reload(true); 
+            }, 600);
+        }
+
+        async function clearAllCaches() {
+            try {
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                }
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    for (let name of cacheNames) {
+                        await caches.delete(name);
+                    }
+                }
+            } catch (e) {
+                console.error("خطأ في مسح الكاش:", e);
+            }
+        }
     </script>
 </body>
 </html>

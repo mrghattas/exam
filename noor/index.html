@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>البوابة السريعة لمنصة عُمان التعليمية</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f4f7f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="بوابة عُمان">
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg">
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; text-align: center; -webkit-tap-highlight-color: transparent;}
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        h2 { color: #333; margin-bottom: 5px; }
+        .subtitle { color: #666; font-size: 14px; margin-bottom: 25px; }
+
+        .section-title { background: #e9ecef; padding: 12px; border-radius: 8px; font-weight: bold; color: #495057; margin-top: 20px; }
+        
+        .btn-link { display: block; margin: 15px auto; padding: 15px; border-radius: 10px; width: 90%; border: none; cursor: pointer; font-size: 16px; font-family: inherit; font-weight: bold; color: white; text-decoration: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.2s;}
+        .btn-link:active { transform: scale(0.98); }
+        
+        .teacher-btn { background-color: #28a745; }
+        .student-btn { background-color: #17a2b8; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" width="60" alt="Logo" style="margin-bottom: 10px;">
+        <h2>البوابة التعليمية السريعة</h2>
+        <p class="subtitle">روابط وصول مباشر لمنصة وزارة التربية والتعليم</p>
+
+        <div class="section-title">👨‍🏫 روابط المعلم</div>
+        <button class="btn-link teacher-btn" onclick="openInApp('https://lms.moe.gov.om/teachers/preparations')">التحضير الإلكتروني</button>
+        <button class="btn-link teacher-btn" onclick="openInApp('https://lms.moe.gov.om/virtual_classrooms')">الفصول الافتراضية</button>
+        <button class="btn-link teacher-btn" onclick="openInApp('https://lms.moe.gov.om/assignments')">إدارة الواجبات</button>
+        <button class="btn-link teacher-btn" onclick="openInApp('https://lms.moe.gov.om/exams')">الاختبارات الإلكترونية</button>
+
+        <div class="section-title">👨‍🎓 روابط الطالب</div>
+        <button class="btn-link student-btn" onclick="openInApp('https://lms.moe.gov.om/students/timetable')">الجدول الدراسي</button>
+        <button class="btn-link student-btn" onclick="openInApp('https://lms.moe.gov.om/virtual_classrooms')">حضور الفصول الافتراضية</button>
+        <button class="btn-link student-btn" onclick="openInApp('https://lms.moe.gov.om/students/assignments')">حل الواجبات</button>
+        <button class="btn-link student-btn" onclick="openInApp('https://lms.moe.gov.om/students/exams')">أداء الاختبارات</button>
+    </div>
+
+    <script>
+        // دالة فتح الروابط لتجنب حظر الـ iframe
+        function openInApp(url) {
+            window.open(url, '_blank');
+        }
+
+        // كود تفعيل التطبيق (Service Worker) لكي يقبل التثبيت على الهاتف
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('تم تفعيل التطبيق بنجاح', reg))
+                    .catch(err => console.error('خطأ في التفعيل', err));
+            });
+        }
+    </script>
+
+</body>
+</html>

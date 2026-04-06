@@ -14,52 +14,96 @@
 
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; text-align: center; -webkit-tap-highlight-color: transparent;}
-        .container { max-width: 600px; margin: 20px auto; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; }
         
         h2 { color: #333; margin-bottom: 5px; }
         .subtitle { color: #666; font-size: 14px; margin-bottom: 25px; }
 
-        .section-title { background: #e9ecef; padding: 12px; border-radius: 8px; font-weight: bold; color: #495057; margin-top: 20px; }
-        
         .btn-link { display: block; margin: 15px auto; padding: 15px; border-radius: 10px; width: 90%; border: none; cursor: pointer; font-size: 16px; font-family: inherit; font-weight: bold; color: white; text-decoration: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.2s;}
         .btn-link:active { transform: scale(0.98); }
         
+        /* ألوان الأزرار */
         .teacher-btn { background-color: #28a745; }
         .student-btn { background-color: #17a2b8; }
+        .login-btn { background-color: #2F2F2F; border: 1px solid #ddd; margin-bottom: 30px;}
+        .back-btn { background-color: #e9ecef; color: #333; width: auto; display: inline-block; padding: 8px 15px; font-size: 14px; margin-top: 0; margin-bottom: 20px;}
+
+        /* إخفاء الأقسام في البداية */
+        #dashboard-screen, #teacher-links, #student-links { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="container" id="welcome-screen">
         <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" width="60" alt="Logo" style="margin-bottom: 10px;">
         <h2>البوابة التعليمية السريعة</h2>
-        <p class="subtitle">روابط وصول مباشر لمنصة وزارة التربية والتعليم</p>
+        <p class="subtitle">الرجاء اختيار صفتك للمتابعة</p>
 
-        <div class="section-title">👨‍🏫 روابط المعلم</div>
-        <button class="btn-link teacher-btn" onclick="openInApp('https://lms.moe.gov.om/teachers/preparations')">التحضير الإلكتروني</button>
-        <button class="btn-link teacher-btn" onclick="openInApp('https://lms.moe.gov.om/virtual_classrooms')">الفصول الافتراضية</button>
-        <button class="btn-link teacher-btn" onclick="openInApp('https://lms.moe.gov.om/assignments')">إدارة الواجبات</button>
-        <button class="btn-link teacher-btn" onclick="openInApp('https://lms.moe.gov.om/exams')">الاختبارات الإلكترونية</button>
+        <button class="btn-link teacher-btn" onclick="showDashboard('teacher')">👨‍🏫 دخول المعلمين</button>
+        <button class="btn-link student-btn" onclick="showDashboard('student')">👨‍🎓 دخول الطلاب</button>
+    </div>
 
-        <div class="section-title">👨‍🎓 روابط الطالب</div>
-        <button class="btn-link student-btn" onclick="openInApp('https://lms.moe.gov.om/students/timetable')">الجدول الدراسي</button>
-        <button class="btn-link student-btn" onclick="openInApp('https://lms.moe.gov.om/virtual_classrooms')">حضور الفصول الافتراضية</button>
-        <button class="btn-link student-btn" onclick="openInApp('https://lms.moe.gov.om/students/assignments')">حل الواجبات</button>
-        <button class="btn-link student-btn" onclick="openInApp('https://lms.moe.gov.om/students/exams')">أداء الاختبارات</button>
+    <div class="container" id="dashboard-screen">
+        <button class="btn-link back-btn" onclick="goBack()">🔙 تغيير المستخدم</button>
+        
+        <h2 id="dashboard-title">لوحة التحكم</h2>
+        <p class="subtitle">1. سجل دخولك أولاً | 2. اختر الخدمة المطلوبة</p>
+
+        <button class="btn-link login-btn" onclick="openLogin('https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=fecfb103-b416-464a-96b2-bd19dd058dc6&scope=User.Read%20openid%20profile%20offline_access&redirect_uri=https%3A%2F%2Flms.moe.gov.om%2F&client-request-id=d9eb2fdc-2b9b-4e44-8950-0d8a131e5e81&response_mode=fragment&response_type=code&x-client-SKU=msal.js.browser&x-client-VER=2.12.1&x-client-OS=&x-client-CPU=&client_info=1&code_challenge=mfTQuJsGcvA7pzEtx3LPMfxJ8UNUAMvueg1tZKskl0o&code_challenge_method=S256&prompt=select_account&nonce=c7d47f1b-39f8-45ef-8674-7b942f5c62c1&state=eyJpZCI6IjMyY2I5MzljLTQ2YzEtNGFkOC1hM2Q1LTk5OWMyOTUwOWMzYiIsIm1ldGEiOnsiaW50ZXJhY3Rpb25UeXBlIjoicmVkaXJlY3QifX0%3D')">
+            🔑 تسجيل الدخول السريع (مايكروسوفت)
+        </button>
+
+        <div id="teacher-links">
+            <button class="btn-link teacher-btn" onclick="openInApp('https://lms.moe.gov.om/teachers/preparations')">التحضير الإلكتروني</button>
+            <button class="btn-link teacher-btn" onclick="openInApp('https://lms.moe.gov.om/virtual_classrooms')">الفصول الافتراضية</button>
+            <button class="btn-link teacher-btn" onclick="openInApp('https://lms.moe.gov.om/assignments')">إدارة الواجبات</button>
+            <button class="btn-link teacher-btn" onclick="openInApp('https://lms.moe.gov.om/exams')">الاختبارات الإلكترونية</button>
+        </div>
+
+        <div id="student-links">
+            <button class="btn-link student-btn" onclick="openInApp('https://lms.moe.gov.om/students/timetable')">الجدول الدراسي</button>
+            <button class="btn-link student-btn" onclick="openInApp('https://lms.moe.gov.om/virtual_classrooms')">حضور الفصول الافتراضية</button>
+            <button class="btn-link student-btn" onclick="openInApp('https://lms.moe.gov.om/students/assignments')">حل الواجبات</button>
+            <button class="btn-link student-btn" onclick="openInApp('https://lms.moe.gov.om/students/exams')">أداء الاختبارات</button>
+        </div>
     </div>
 
     <script>
-        // التعديل الجديد: إجبار الهاتف على فتح الرابط داخل نفس نافذة التطبيق
+        // دوال فتح الروابط
+        function openLogin(url) {
+            window.open(url, '_blank');
+        }
         function openInApp(url) {
             window.location.href = url;
         }
 
-        // كود تفعيل التطبيق (Service Worker) لكي يقبل التثبيت على الهاتف
+        // دوال التنقل بين الشاشات
+        function showDashboard(role) {
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('dashboard-screen').style.display = 'block';
+
+            if (role === 'teacher') {
+                document.getElementById('dashboard-title').innerText = '👨‍🏫 بوابة المعلم';
+                document.getElementById('teacher-links').style.display = 'block';
+                document.getElementById('student-links').style.display = 'none';
+            } else if (role === 'student') {
+                document.getElementById('dashboard-title').innerText = '👨‍🎓 بوابة الطالب';
+                document.getElementById('teacher-links').style.display = 'none';
+                document.getElementById('student-links').style.display = 'block';
+            }
+        }
+
+        function goBack() {
+            document.getElementById('dashboard-screen').style.display = 'none';
+            document.getElementById('welcome-screen').style.display = 'block';
+            document.getElementById('teacher-links').style.display = 'none';
+            document.getElementById('student-links').style.display = 'none';
+        }
+
+        // كود Service Worker للتطبيق
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('تم تفعيل التطبيق بنجاح', reg))
-                    .catch(err => console.error('خطأ في التفعيل', err));
+                navigator.serviceWorker.register('sw.js');
             });
         }
     </script>

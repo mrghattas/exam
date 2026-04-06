@@ -49,8 +49,8 @@
         <h2 id="dashboard-title">لوحة التحكم</h2>
         <p class="subtitle">1. سجل دخولك أولاً | 2. اختر الخدمة المطلوبة</p>
 
-        <button class="btn-link login-btn" onclick="openLogin('https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=fecfb103-b416-464a-96b2-bd19dd058dc6&scope=User.Read%20openid%20profile%20offline_access&redirect_uri=https%3A%2F%2Flms.moe.gov.om%2F&client-request-id=d9eb2fdc-2b9b-4e44-8950-0d8a131e5e81&response_mode=fragment&response_type=code&x-client-SKU=msal.js.browser&x-client-VER=2.12.1&x-client-OS=&x-client-CPU=&client_info=1&code_challenge=mfTQuJsGcvA7pzEtx3LPMfxJ8UNUAMvueg1tZKskl0o&code_challenge_method=S256&prompt=select_account&nonce=c7d47f1b-39f8-45ef-8674-7b942f5c62c1&state=eyJpZCI6IjMyY2I5MzljLTQ2YzEtNGFkOC1hM2Q1LTk5OWMyOTUwOWMzYiIsIm1ldGEiOnsiaW50ZXJhY3Rpb25UeXBlIjoicmVkaXJlY3QifX0%3D')">
-            🔑 تسجيل الدخول السريع (مايكروسوفت)
+        <button class="btn-link login-btn" onclick="openInApp('https://lms.moe.gov.om/')">
+            🔑 تسجيل الدخول بالمنصة
         </button>
 
         <div id="teacher-links">
@@ -69,10 +69,7 @@
     </div>
 
     <script>
-        // دوال فتح الروابط
-        function openLogin(url) {
-            window.open(url, '_blank');
-        }
+        // دالة موحدة لفتح جميع الروابط داخل نفس التطبيق
         function openInApp(url) {
             window.location.href = url;
         }

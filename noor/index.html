@@ -49,9 +49,9 @@
     </div>
 
     <script>
-        // دالة فتح الروابط لتجنب حظر الـ iframe
+        // التعديل الجديد: إجبار الهاتف على فتح الرابط داخل نفس نافذة التطبيق
         function openInApp(url) {
-            window.open(url, '_blank');
+            window.location.href = url;
         }
 
         // كود تفعيل التطبيق (Service Worker) لكي يقبل التثبيت على الهاتف

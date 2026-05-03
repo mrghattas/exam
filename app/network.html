@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الإدارة المتقدمة للراوترات</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --gray-light: #f3f4f6;
+            --gray-dark: #374151;
+            --bg-color: #f8fafc;
+        }
+
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background-color: var(--bg-color); color: var(--gray-dark); margin: 0; padding: 20px; text-align: right; }
+        
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #1e293b; margin: 0 0 10px 0; }
+        .header p { color: #64748b; margin: 0; }
+
+        .container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        
+        /* أزرار التحكم العامة والتحديث التلقائي */
+        .global-actions {
+            display: flex; gap: 10px; justify-content: center; align-items: center; margin-bottom: 10px; flex-wrap: wrap;
+            background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .auto-ping-control {
+            display: flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 8px 15px; border-radius: 8px; font-weight: bold; border: 1px solid #cbd5e1;
+        }
+        .auto-ping-control select {
+            padding: 5px; border-radius: 4px; border: 1px solid #94a3b8; font-family: inherit; font-weight: bold; outline: none;
+        }
+
+        .btn-ping-all { background-color: #f59e0b; color: white; font-weight: bold; font-size: 1rem; padding: 10px 20px;}
+        .btn-ping-all:hover { background-color: #d97706; }
+        
+        .btn-reboot-all { background-color: #dc2626; color: white; font-weight: bold; font-size: 1rem; padding: 10px 20px;}
+        .btn-reboot-all:hover { background-color: #b91c1c; }
+
+        .btn-add-toggle { background-color: #2563eb; color: white; font-weight: bold; font-size: 1rem; padding: 10px 20px; }
+        .btn-add-toggle:hover { background-color: #1d4ed8; }
+
+        /* القوائم المنسدلة (تم حل مشكلة الاختفاء السريع هنا) */
+        .dropdown { position: relative; display: inline-block; padding-bottom: 10px; margin-bottom: -10px; } /* الجسر السحري لمنع اختفاء القائمة */
+        .btn-data { background-color: #14b8a6; color: white; font-weight: bold; font-size: 1rem; padding: 10px 20px; }
+        .btn-data:hover { background-color: #0d9488; }
+        .dropdown-content {
+            display: none; position: absolute; background-color: #ffffff; min-width: 180px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 999; border-radius: 8px; right: 0; overflow: hidden;
+            border: 1px solid #e2e8f0; top: 100%; margin-top: 0;
+        }
+        .dropdown-content a { color: #1e293b; padding: 12px 16px; text-decoration: none; display: block; text-align: right; font-weight: bold; font-size: 0.9rem;}
+        .dropdown-content a:hover { background-color: #f1f5f9; color: var(--primary); }
+        .dropdown:hover .dropdown-content { display: block; }
+        
+        /* تنسيق الأزرار داخل القائمة المنسدلة للراوتر */
+        .dropdown-content button {
+            width: 100%; text-align: right; background: none; color: #1e293b; 
+            padding: 12px 16px; border: none; border-radius: 0; font-weight: bold; 
+            font-size: 0.9rem; justify-content: flex-start; margin: 0; cursor: pointer;
+        }
+        .dropdown-content button:hover:not(:disabled) { background-color: #f1f5f9; color: var(--primary); }
+        .dropdown-content button:disabled { opacity: 0.6; cursor: not-allowed; color: #94a3b8; }
+
+        /* الكروت */
+        .router-card {
+            background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex; flex-direction: column; gap: 15px;
+            border-right: 5px solid #cbd5e1; transition: border-color 0.3s;
+        }
+        
+        .router-card.online { border-right-color: var(--success); }
+        .router-card.offline { border-right-color: var(--danger); }
+
+        .router-main-row {
+            display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;
+        }
+
+        /* الجانب الأيمن: المعلومات */
+        .info-group { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; flex: 1;}
+        .router-name { font-size: 1.15rem; font-weight: bold; color: #1e293b; }
+        .status-badge {
+            display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;
+            background: #e2e8f0; color: #475569; white-space: nowrap;
+        }
+        
+        .sort-buttons { display: flex; gap: 5px; }
+        .btn-sort { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; padding: 5px 10px; transition: 0.2s;}
+        .btn-sort:hover { background: #e2e8f0; }
+
+        /* الجانب الأيسر: الأزرار */
+        .actions-section { 
+            display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; 
+            padding-bottom: 5px; overflow: visible; align-items: flex-start;
+        }
+        
+        button {
+            padding: 8px 12px; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px;
+            white-space: nowrap;
+        }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover:not(:disabled) { background-color: #1d4ed8; }
+
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-success:hover:not(:disabled) { background-color: #059669; }
+
+        .btn-warning { background-color: var(--warning); color: white; }
+        .btn-warning:hover:not(:disabled) { background-color: #d97706; }
+
+        .btn-delete { background-color: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 4px 8px;}
+        .btn-delete:hover { background-color: #fee2e2; }
+
+        /* تصميم قسم إضافة راوتر (منسدل) */
+        .add-router-section {
+            background: #fff; padding: 25px; border-radius: 12px; border: 2px dashed #94a3b8;
+            display: none; flex-direction: column; gap: 15px; margin-top: -10px; margin-bottom: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            animation: fadeInDown 0.3s ease-out forwards;
+        }
+        .add-router-header { font-weight: bold; color: var(--primary); font-size: 1.2rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; display:flex; justify-content: space-between; align-items:center;}
+        .close-btn { background: none; color: #64748b; font-size: 1.2rem; cursor: pointer; border: none; padding: 0;}
+        .close-btn:hover { color: var(--danger); }
+        .add-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        
+        /* منطقة الإعدادات المخفية والقراءة فقط */
+        .settings-panel {
+            background: var(--gray-light); padding: 15px; border-radius: 8px;
+            display: none; flex-direction: column; gap: 15px; margin-top: 5px; border: 1px solid #e2e8f0;
+        }
+        
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 0.85rem; font-weight: 600; color: #475569; display: flex; align-items: center;}
+        .input-group input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-family: inherit; }
+        
+        /* ستايل الحقول غير القابلة للتعديل */
+        input[readonly] { background-color: #e2e8f0; color: #64748b; border-color: #cbd5e1; cursor: default; }
+        input[readonly]:focus { outline: none; }
+        
+        .section-title { border-bottom: 2px solid #cbd5e1; padding-bottom: 5px; font-weight: bold; color: #1e293b; display: flex; justify-content: space-between; align-items: center;}
+
+        /* صندوق مساعدة استخراج المسار */
+        .help-icon {
+            display: inline-flex; background: #2563eb; color: white; border-radius: 50%; width: 18px; height: 18px;
+            align-items: center; justify-content: center; font-size: 12px; cursor: pointer; margin-right: 8px; font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .help-icon:hover { background: #1d4ed8; transform: scale(1.1); }
+        
+        .help-box {
+            display: none; background: #fffbeb; border: 1px solid #fcd34d; padding: 15px; border-radius: 8px;
+            font-size: 0.85rem; margin-top: 8px; color: #92400e; line-height: 1.6;
+        }
+        .help-box ol { margin: 5px 0; padding-right: 20px; }
+        .help-box ul { margin: 5px 0 0 0; padding-right: 20px; list-style-type: square;}
+        .help-box li { margin-bottom: 6px; }
+        
+        .copy-badge {
+            background: #fef3c7; border: 1px solid #f59e0b; padding: 3px 8px; border-radius: 4px;
+            cursor: pointer; font-family: monospace; display: inline-block; direction: ltr; font-weight: bold;
+            transition: 0.2s; color: #b45309;
+        }
+        .copy-badge:hover { background: #fde68a; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        .sys-msg { font-size: 0.85rem; font-weight: bold; text-align: left; min-height: 20px; }
+
+        /* تصميم سجل الأحداث (Log) القابل للطي */
+        .log-section {
+            background: #fff; border-radius: 12px; margin-bottom: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; overflow: hidden;
+        }
+        .log-header { 
+            display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; 
+            cursor: pointer; background: #f8fafc; transition: background 0.3s;
+        }
+        .log-header:hover { background: #f1f5f9; }
+        .log-header h3 { margin: 0; color: #1e293b; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;}
+        .log-content { max-height: 250px; overflow-y: auto; background: #1e293b; color: #38bdf8; padding: 15px; font-family: monospace; font-size: 0.95rem; direction: ltr; text-align: left; display: none;}
+        .log-entry { margin-bottom: 8px; border-bottom: 1px solid #334155; padding-bottom: 8px; display: flex; gap: 10px; }
+        .log-time { color: #94a3b8; font-weight: bold; white-space: nowrap; }
+
+        /* تصميم الإشعارات (Toasts) */
+        #toast-container {
+            position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;
+        }
+        .toast {
+            padding: 12px 20px; border-radius: 8px; color: white; font-weight: bold; font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease-out forwards, fadeOut 0.5s ease-out 4.5s forwards;
+            opacity: 0; transform: translateX(100%); max-width: 350px;
+        }
+        .toast.error { background-color: var(--danger); border-right: 5px solid #7f1d1d; }
+        .toast.success { background-color: var(--success); border-right: 5px solid #14532d; }
+        .toast.info { background-color: var(--primary); border-right: 5px solid #1e3a8a; }
+
+        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateX(100%); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .router-main-row { flex-direction: column; align-items: stretch; }
+            .actions-section { justify-content: flex-start; }
+            .sys-msg { text-align: center; }
+            .log-header { flex-direction: column; gap: 10px; align-items: flex-start;}
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>لوحة تحكم الراوترات المركزية</h1>
+        <p>إدارة، فحص جودة الاتصال، وإعادة تشغيل نقاط التوزيع</p>
+    </div>
+
+    <div class="container">
+        <!-- زر إدارة البيانات في الأعلى ومستقل -->
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 5px;">
+            <div class="dropdown">
+                <button class="btn-data">💾 حفظ بيانات الأجهزة ▼</button>
+                <div class="dropdown-content">
+                    <a href="#" onclick="exportData(event)">💾 تصدير (حفظ نسخة)</a>
+                    <a href="#" onclick="triggerImport(event)">📂 استيراد (تحميل نسخة)</a>
+                </div>
+            </div>
+            <input type="file" id="import-file" style="display: none;" accept=".txt,.json" onchange="importData(event)">
+        </div>
+
+        <!-- أزرار التحكم العامة -->
+        <div class="global-actions">
+            <button class="btn-ping-all" onclick="pingAllRouters(true)">🔍 فحص الكل</button>
+            <button class="btn-reboot-all" onclick="rebootAllRouters()">🔄 ريستارت للكل</button>
+            <button class="btn-add-toggle" onclick="toggleAddRouter()">➕ إضافة راوتر</button>
+            
+            <!-- قائمة الفحص التلقائي -->
+            <div class="auto-ping-control">
+                <label for="auto-ping-select">⏱️ تحديث:</label>
+                <select id="auto-ping-select" onchange="setupAutoPing()">
+                    <option value="0">إيقاف</option>
+                    <option value="10000">كل 10 ثواني</option>
+                    <option value="30000">كل 30 ثانية</option>
+                    <option value="60000">كل دقيقة</option>
+                    <option value="300000">كل 5 دقائق</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- قسم إضافة راوتر جديد (منسدل/مخفي افتراضياً) -->
+        <div class="add-router-section" id="add-router-section">
+            <div class="add-router-header">
+                <span>➕ إضافة نقطة توزيع جديدة</span>
+                <button class="close-btn" onclick="toggleAddRouter()">✖</button>
+            </div>
+            <div class="add-form-grid">
+                <div class="input-group">
+                    <label>اسم الراوتر (للعرض):</label>
+                    <input type="text" id="new-name" placeholder="مثال: راوتر الدور الثالث">
+                </div>
+                <div class="input-group">
+                    <label>عنوان الـ IP:</label>
+                    <input type="text" id="new-ip" placeholder="192.168.1.xxx">
+                </div>
+                <div class="input-group">
+                    <label>اسم المستخدم:</label>
+                    <input type="text" id="new-user" placeholder="(اتركه فارغاً غالباً)">
+                </div>
+                <div class="input-group">
+                    <label>كلمة المرور:</label>
+                    <input type="text" id="new-pass" value="admin">
+                </div>
+                
+                <div class="input-group">
+                    <label>اسم شبكة WiFi (للعرض):</label>
+                    <input type="text" id="new-wifi-ssid" placeholder="مثال: My_Home_Network">
+                </div>
+                <div class="input-group">
+                    <label>باسورد WiFi (للعرض):</label>
+                    <input type="text" id="new-wifi-pass" placeholder="كلمة مرور الواي فاي">
+                </div>
+
+                <div class="input-group">
+                    <label>مسار إعدادات WiFi:</label>
+                    <input type="text" id="new-wifi" placeholder="مثال: wlbasic.htm">
+                </div>
+
+                <div class="input-group" style="grid-column: 1 / -1;">
+                    <label>مسار أمر إعادة التشغيل: <span class="help-icon" onclick="toggleHelp('help-new')" title="اضغط لمعرفة كيفية الحصول على المسار">?</span></label>
+                    <input type="text" id="new-reboot" value="setup.cgi?todo=reboot" title="يختلف حسب نوع الراوتر">
+                    
+                    <div class="help-box" id="help-new">
+                        <strong>كيف تستخرج أي مسار لأي راوتر؟</strong>
+                        <ol>
+                            <li>افتح صفحة الراوتر من الكمبيوتر واضغط <b>F12</b> ثم اختر تبويب <b>Network</b> من النافذة الجانبية.</li>
+                            <li>اضغط على الزر المطلوب (ريستارت أو إعدادات الواي فاي) بداخل صفحة الراوتر.</li>
+                            <li>سيظهر رابط جديد في نافذة الشبكة، انسخ فقط الكلمات التي تظهر <b>بعد رقم الـ IP</b>.</li>
+                        </ol>
+                        <strong>مسارات ريستارت شائعة للإدراج السريع:</strong>
+                        <ul>
+                            <li>Linksys / Cisco: <span class="copy-badge" onclick="fillPath('new-reboot', 'setup.cgi?todo=reboot')">setup.cgi?todo=reboot</span> أو <span class="copy-badge" onclick="fillPath('new-reboot', 'apply.cgi?action=Reboot')">apply.cgi?action=Reboot</span></li>
+                            <li>OpenWrt: <span class="copy-badge" onclick="fillPath('new-reboot', 'cgi-bin/luci/admin/system/reboot')">cgi-bin/luci/admin/system/reboot</span></li>
+                            <li>DD-WRT: <span class="copy-badge" onclick="fillPath('new-reboot', 'apply.cgi?action=Reboot')">apply.cgi?action=Reboot</span></li>
+                            <li>TP-Link (القديمة): <span class="copy-badge" onclick="fillPath('new-reboot', 'userRpm/SysRebootRpm.htm?Reboot=Reboot')">userRpm/SysRebootRpm.htm?Reboot=Reboot</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <button class="btn-success" onclick="addNewRouter()" style="width: fit-content; align-self: flex-end; padding: 10px 20px; font-size: 1rem;">حفظ وإضافة للوحة 💾</button>
+        </div>
+
+        <!-- سجل الأحداث (Log) القابل للطي -->
+        <div class="log-section">
+            <div class="log-header" onclick="toggleLog()">
+                <h3>📑 سجل المراقبة والأحداث <span id="log-arrow" style="font-size: 0.8rem; color:#64748b;">▼</span></h3>
+                <div style="display:flex; gap: 8px;" onclick="event.stopPropagation()">
+                    <button class="btn-open" style="padding: 4px 8px;" onclick="downloadLogFile()">📥 تحميل</button>
+                    <button class="btn-delete" onclick="clearLogs()">🗑️ مسح</button>
+                </div>
+            </div>
+            <div class="log-content" id="log-container">
+                <!-- سيتم إدراج الأحداث هنا -->
+            </div>
+        </div>
+
+        <!-- قائمة الراوترات -->
+        <div id="routers-container" style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- سيتم رسم الكروت هنا عبر الجافاسكربت -->
+        </div>
+
+    </div>
+
+    <!-- حاوية الإشعارات -->
+    <div id="toast-container"></div>
+
+    <script>
+        // --- قاعدة بيانات الراوترات ---
+        const defaultRouters = [
+            { id: 1690000001, ip: '192.168.1.250', name: 'راوتر الدور الأول', username: '', password: 'admin', rebootUrl: 'setup.cgi?todo=reboot', wifiUrl: 'wlbasic.htm', wifiSsid: 'Home_Network_1', wifiPass: '12345678', isOffline: false },
+            { id: 1690000002, ip: '192.168.1.251', name: 'راوتر الدور الثاني', username: '', password: 'admin', rebootUrl: 'setup.cgi?todo=reboot', wifiUrl: 'wlbasic.htm', wifiSsid: 'Home_Network_2', wifiPass: '87654321', isOffline: false }
+        ];
+
+        let routers = [];
+        let autoPingTimer = null; 
+        let systemLogs = []; 
+        
+        function loadRouters() {
+            const saved = localStorage.getItem('myRouters');
+            if (saved) {
+                routers = JSON.parse(saved);
+                routers.forEach(r => r.isOffline = false); 
+            } else {
+                routers = [...defaultRouters];
+                saveRouters();
+            }
+            
+            const savedLogs = localStorage.getItem('systemLogs');
+            if (savedLogs) {
+                systemLogs = JSON.parse(savedLogs);
+                renderLogs();
+            }
+        }
+
+        function saveRouters() {
+            localStorage.setItem('myRouters', JSON.stringify(routers));
+        }
+
+        // --- دوال ترتيب الراوترات (أعلى/أسفل) ---
+        function moveUp(id) {
+            const index = routers.findIndex(r => r.id === id);
+            if (index > 0) {
+                const temp = routers[index];
+                routers[index] = routers[index - 1];
+                routers[index - 1] = temp;
+                saveRouters();
+                renderDashboard();
+            }
+        }
+
+        function moveDown(id) {
+            const index = routers.findIndex(r => r.id === id);
+            if (index < routers.length - 1) {
+                const temp = routers[index];
+                routers[index] = routers[index + 1];
+                routers[index + 1] = temp;
+                saveRouters();
+                renderDashboard();
+            }
+        }
+
+        // --- التحكم في الصناديق والمساعدة ---
+        function toggleAddRouter() {
+            const section = document.getElementById('add-router-section');
+            section.style.display = section.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function toggleLog() {
+            const content = document.getElementById('log-container');
+            const arrow = document.getElementById('log-arrow');
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                arrow.innerText = '▲';
+                content.scrollTop = content.scrollHeight; 
+            } else {
+                content.style.display = 'none';
+                arrow.innerText = '▼';
+            }
+        }
+
+        function toggleHelp(id) {
+            const el = document.getElementById(id);
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function fillPath(inputId, path) {
+            document.getElementById(inputId).value = path;
+            showToast('تم إدراج المسار بنجاح!', 'success');
+        }
+
+        // --- نظام سجل الأحداث (Log System) ---
+        function addLog(message) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+            const dateStr = now.toLocaleDateString('en-GB'); 
+            
+            const logEntry = { time: `${dateStr} ${timeStr}`, msg: message };
+            systemLogs.push(logEntry); 
+            
+            if(systemLogs.length > 150) systemLogs.shift(); 
+            
+            localStorage.setItem('systemLogs', JSON.stringify(systemLogs));
+            renderLogs();
+        }
+
+        function renderLogs() {
+            const container = document.getElementById('log-container');
+            container.innerHTML = '';
+            
+            if(systemLogs.length === 0) {
+                container.innerHTML = '<div style="color:#64748b; text-align:right;">السجل فارغ. سيتم تسجيل الأحداث هنا.</div>';
+                return;
+            }
+
+            systemLogs.forEach(log => {
+                container.innerHTML += `
+                    <div class="log-entry">
+                        <span class="log-time">[${log.time}]</span>
+                        <span dir="rtl" style="flex-grow:1; text-align:right;">${log.msg}</span>
+                    </div>
+                `;
+            });
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearLogs() {
+            if(!confirm("هل أنت متأكد من مسح جميع السجلات؟")) return;
+            systemLogs = [];
+            localStorage.setItem('systemLogs', JSON.stringify(systemLogs));
+            renderLogs();
+            addLog("🗑️ تم مسح السجل بواسطة المستخدم.");
+        }
+
+        function downloadLogFile() {
+            if(systemLogs.length === 0) {
+                alert("السجل فارغ!"); return;
+            }
+            let logText = "=== سجل مراقبة الراوترات ===\n\n";
+            systemLogs.forEach(log => {
+                logText += `[${log.time}] ${log.msg}\n`;
+            });
+            
+            const blob = new Blob([logText], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `Router_Logs_${new Date().getTime()}.txt`; 
+            a.click(); URL.revokeObjectURL(url);
+            addLog("📥 تم تحميل ملف السجل.");
+        }
+
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerText = message;
+            
+            container.appendChild(toast);
+            setTimeout(() => { if (toast.parentElement) toast.remove(); }, 5000);
+        }
+
+        // --- نظام الفحص التلقائي المؤقت ---
+        function setupAutoPing() {
+            const interval = parseInt(document.getElementById('auto-ping-select').value);
+            
+            if (autoPingTimer) {
+                clearInterval(autoPingTimer);
+                autoPingTimer = null;
+            }
+
+            if (interval > 0) {
+                pingAllRouters(true); 
+                autoPingTimer = setInterval(() => pingAllRouters(true), interval);
+                showToast(`تم تفعيل الفحص التلقائي كل ${interval / 1000} ثانية`, 'info');
+                addLog(`⏱️ تم تشغيل التحديث التلقائي (${interval / 1000} ثانية)`);
+            } else {
+                showToast('تم إيقاف الفحص التلقائي', 'info');
+                addLog(`⏹️ تم إيقاف التحديث التلقائي`);
+            }
+        }
+
+        // --- دوال التحكم في الراوترات ---
+        function addNewRouter() {
+            const name = document.getElementById('new-name').value;
+            const ip = document.getElementById('new-ip').value;
+            const user = document.getElementById('new-user').value;
+            const pass = document.getElementById('new-pass').value;
+            const rebootPath = document.getElementById('new-reboot').value || 'setup.cgi?todo=reboot';
+            const wifiPath = document.getElementById('new-wifi').value || '';
+            const wifiSsid = document.getElementById('new-wifi-ssid').value || '';
+            const wifiPass = document.getElementById('new-wifi-pass').value || '';
+
+            if (!name || !ip) { alert('الرجاء إدخال اسم الراوتر وعنوان الـ IP على الأقل.'); return; }
+
+            const newRouter = { 
+                id: Date.now(), name: name, ip: ip, username: user, password: pass, 
+                rebootUrl: rebootPath, wifiUrl: wifiPath, wifiSsid: wifiSsid, wifiPass: wifiPass, isOffline: false 
+            };
+            routers.push(newRouter);
+            saveRouters(); renderDashboard();
+            addLog(`➕ تمت إضافة راوتر جديد: ${name} (${ip})`);
+            
+            document.getElementById('new-name').value = ''; document.getElementById('new-ip').value = ''; 
+            document.getElementById('new-reboot').value = 'setup.cgi?todo=reboot';
+            document.getElementById('new-wifi').value = '';
+            document.getElementById('new-wifi-ssid').value = '';
+            document.getElementById('new-wifi-pass').value = '';
+            toggleAddRouter(); 
+        }
+
+        function pingAllRouters(logStatus = false) {
+            if (routers.length === 0) return;
+            if (logStatus) addLog("🔍 بدء فحص جماعي للراوترات...");
+            routers.forEach(r => pingRouter(r.id, r.ip, logStatus));
+        }
+
+        function deleteRouter(id) {
+            if(!confirm('هل أنت متأكد من حذف هذا الراوتر من اللوحة؟')) return;
+            const router = routers.find(r => r.id === id);
+            routers = routers.filter(r => r.id !== id);
+            saveRouters(); renderDashboard();
+            if(router) addLog(`🗑️ تم حذف الراوتر: ${router.name}`);
+        }
+
+        async function pingRouter(id, ip, logStatus = false) {
+            const router = routers.find(r => r.id === id);
+            if (!router) return;
+
+            const badge = document.getElementById(`badge-${id}`);
+            const card = document.getElementById(`card-${id}`);
+            const btnReboot = document.getElementById(`btn-reboot-${id}`);
+
+            badge.innerText = 'جاري الفحص...';
+            badge.style.background = '#f59e0b'; badge.style.color = 'white';
+            card.classList.remove('online', 'offline');
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); 
+
+            try {
+                await fetch(`http://${ip}/`, { mode: 'no-cors', signal: controller.signal });
+                clearTimeout(timeoutId);
+                
+                badge.innerText = 'متصل (Online)';
+                badge.style.background = 'var(--success)';
+                card.classList.add('online');
+                if(btnReboot) btnReboot.disabled = false;
+
+                if (router.isOffline) {
+                    showToast(`✅ عاد الراوتر للعمل: ${router.name}`, 'success');
+                    addLog(`🟢 عاد الراوتر للعمل بشكل طبيعي: ${router.name}`);
+                    router.isOffline = false;
+                } else if (logStatus) {
+                    addLog(`🟢 حالة الراوتر [${router.name}]: متصل ويعمل.`);
+                }
+
+            } catch (error) {
+                clearTimeout(timeoutId);
+                badge.innerText = 'مفصول (Offline)';
+                badge.style.background = 'var(--danger)';
+                card.classList.add('offline');
+                if(btnReboot) btnReboot.disabled = true;
+
+                if (!router.isOffline) {
+                    showToast(`⚠️ انقطع الاتصال عن ${router.name}!`, 'error');
+                    addLog(`🔴 انقطع الاتصال / مهنج: ${router.name}`);
+                    router.isOffline = true;
+                } else if (logStatus) {
+                    addLog(`🔴 حالة الراوتر [${router.name}]: مفصول ولا يستجيب.`);
+                }
+            }
+        }
+
+        function rebootRouter(id, ip) {
+            const router = routers.find(r => r.id === id);
+            if(!router) return;
+
+            const rebootPath = router.rebootUrl || 'setup.cgi?todo=reboot';
+            const cleanPath = rebootPath.replace(/^\//, ''); 
+            const fullUrl = `http://${ip}/${cleanPath}`;
+
+            if(confirm(`هل تريد فتح صفحة "إعادة التشغيل" لهذا الراوتر في نافذة جديدة؟\n\nالرابط:\n${fullUrl}`)) {
+                window.open(fullUrl, '_blank');
+                addLog(`🔄 تم فتح مسار إعادة التشغيل للراوتر: ${router.name}`);
+                
+                const msg = document.getElementById(`msg-${id}`);
+                if(msg) {
+                    msg.innerText = '✅ تم فتح مسار ريستارت في المتصفح.';
+                    msg.style.color = 'var(--success)';
+                }
+            }
+        }
+
+        async function rebootAllRouters() {
+            if(!confirm("سيتم فتح صفحة إعادة التشغيل في متصفح جديد لكل راوتر.\n(يرجى السماح بالنوافذ المنبثقة Pop-ups).\nهل أنت متأكد من الاستمرار؟")) return;
+
+            addLog("⚡ طلب المستخدم فتح مسارات إعادة التشغيل لجميع الأجهزة...");
+            for (const router of routers) {
+                const rebootPath = router.rebootUrl || 'setup.cgi?todo=reboot';
+                const cleanPath = rebootPath.replace(/^\//, ''); 
+                window.open(`http://${router.ip}/${cleanPath}`, '_blank');
+            }
+        }
+
+        function openWifiSettings(id, ip) {
+            const router = routers.find(r => r.id === id);
+            if(!router) return;
+
+            const wifiPath = router.wifiUrl || ''; 
+            if(!wifiPath) {
+                alert('⚠️ الرجاء إدخال "مسار إعدادات الواي فاي" من قسم (⚙️ بيانات الراوتر) أدناه، ثم اضغط حفظ.');
+                return;
+            }
+
+            const cleanPath = wifiPath.replace(/^\//, '');
+            const fullUrl = `http://${ip}/${cleanPath}`;
+
+            if(confirm(`هل تريد الانتقال إلى صفحة الواي فاي؟\n\nالرابط:\n${fullUrl}`)) {
+                window.open(fullUrl, '_blank');
+                addLog(`📶 تم فتح صفحة الواي فاي للراوتر: ${router.name}`);
+            }
+        }
+
+        // --- دوال إعدادات القراءة والتعديل ---
+        function enableEdit(id) {
+            const panel = document.getElementById(`settings-${id}`);
+            const inputs = panel.querySelectorAll('input');
+            inputs.forEach(input => input.removeAttribute('readonly'));
+            
+            const editBtn = document.getElementById(`btn-edit-${id}`);
+            if(editBtn) editBtn.style.display = 'none';
+            
+            const saveBtn = document.getElementById(`btn-save-${id}`);
+            if(saveBtn) saveBtn.style.display = 'block';
+        }
+
+        function renderDashboard() {
+            const container = document.getElementById('routers-container');
+            container.innerHTML = '';
+
+            if (routers.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding: 20px; background:white; border-radius: 8px;">لا يوجد راوترات. اضغط على إضافة راوتر جديد من الأعلى.</div>';
+                return;
+            }
+
+            routers.forEach(r => {
+                const card = document.createElement('div');
+                card.className = 'router-card';
+                card.id = `card-${r.id}`;
+
+                const rUrl = r.rebootUrl || 'setup.cgi?todo=reboot';
+                const rWifiUrl = r.wifiUrl || '';
+                const rWifiSsid = r.wifiSsid || '';
+                const rWifiPass = r.wifiPass || '';
+                const rUser = r.username || '';
+                const rPass = r.password || 'admin';
+
+                card.innerHTML = `
+                    <div class="router-main-row">
+                        <!-- الجانب الأيمن: البيانات والترتيب -->
+                        <div class="info-group">
+                            <!-- الاسم ثم حالة الفحص -->
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <span class="router-name">${r.name}</span>
+                                <span id="badge-${r.id}" class="status-badge">جاري الفحص...</span>
+                            </div>
+                            
+                            <!-- الشبكة، الباسورد، ثم الـ IP بالترتيب المطلوب -->
+                            <div style="font-size: 0.85rem; color: #64748b; display: flex; flex-direction: column; gap: 5px; margin-top: 8px;">
+                                <span style="display: ${rWifiSsid ? 'block' : 'none'};">📶 شبكة WiFi: <strong style="color:#1e293b;">${rWifiSsid}</strong></span>
+                                <span style="display: ${rWifiPass ? 'block' : 'none'};">🔑 الباسورد: <strong style="color:#1e293b;">${rWifiPass}</strong></span>
+                                <span>🌐 IP الراوتر: <strong style="font-family:monospace; color:var(--primary); background: #eff6ff; padding: 2px 6px; border-radius: 4px;">${r.ip}</strong></span>
+                            </div>
+                            
+                            <div class="sort-buttons" style="margin-top: 8px;">
+                                <button class="btn-sort" onclick="moveUp(${r.id})" title="تحريك لأعلى">⬆️</button>
+                                <button class="btn-sort" onclick="moveDown(${r.id})" title="تحريك لأسفل">⬇️</button>
+                            </div>
+                        </div>
+
+                        <!-- الجانب الأيسر: الأزرار مع القائمة المنسدلة -->
+                        <div class="actions-section">
+                            <div class="dropdown">
+                                <button class="btn-primary" style="padding: 10px 15px;">⚡ الإجراءات ▼</button>
+                                <div class="dropdown-content">
+                                    <button onclick="window.open('http://${r.ip}', '_blank')">🌐 فتح المتصفح</button>
+                                    <button onclick="pingRouter(${r.id}, '${r.ip}')" id="btn-ping-${r.id}">🔍 فحص الاتصال</button>
+                                    <button onclick="rebootRouter(${r.id}, '${r.ip}')" id="btn-reboot-${r.id}">🔄 إعادة تشغيل</button>
+                                    <button onclick="openWifiSettings(${r.id}, '${r.ip}')">📶 إعدادات WiFi</button>
+                                </div>
+                            </div>
+                            
+                            <button class="btn-warning" onclick="toggleSettings('settings-${r.id}')">⚙️ بيانات الراوتر</button>
+                            <button class="btn-delete" onclick="deleteRouter(${r.id})" title="حذف هذا الراوتر">🗑️</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-panel" id="settings-${r.id}">
+                        <div class="section-title">
+                            <span>إعدادات الراوتر الداخلية</span>
+                            <button id="btn-edit-${r.id}" class="btn-warning" style="padding: 4px 10px; font-size: 0.8rem;" onclick="enableEdit(${r.id})">✏️ تعديل</button>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="input-group">
+                                <label>اسم الراوتر (للعرض):</label>
+                                <input type="text" id="local-name-${r.id}" value="${r.name}" readonly>
+                            </div>
+                            <div class="input-group">
+                                <label>عنوان الـ IP:</label>
+                                <input type="text" id="local-ip-${r.id}" value="${r.ip}" readonly>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="input-group">
+                                <label>اسم المستخدم (إن وُجد):</label>
+                                <input type="text" id="user-${r.id}" value="${rUser}" readonly>
+                            </div>
+                            <div class="input-group">
+                                <label>كلمة المرور:</label>
+                                <input type="text" id="pass-${r.id}" value="${rPass}" readonly>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="input-group">
+                                <label>اسم شبكة WiFi (للعرض):</label>
+                                <input type="text" id="wifi-ssid-${r.id}" value="${rWifiSsid}" placeholder="اسم الشبكة" readonly>
+                            </div>
+                            <div class="input-group">
+                                <label>باسورد WiFi (للعرض):</label>
+                                <input type="text" id="wifi-pass-${r.id}" value="${rWifiPass}" placeholder="الباسورد" readonly>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="input-group">
+                                <label>مسار أمر ريستارت: <span class="help-icon" onclick="toggleHelp('help-${r.id}')" title="مساعدة استخراج المسار">?</span></label>
+                                <input type="text" id="reboot-url-${r.id}" value="${rUrl}" readonly>
+                            </div>
+                            <div class="input-group">
+                                <label>مسار إعدادات WiFi:</label>
+                                <input type="text" id="wifi-url-${r.id}" value="${rWifiUrl}" placeholder="مثال: wlbasic.htm" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="help-box" id="help-${r.id}">
+                            <strong>كيف تستخرج مسار ريستارت أو مسار الواي فاي لأي راوتر؟</strong>
+                            <ol>
+                                <li>افتح صفحة الراوتر واضغط <b>F12</b> ثم اختر <b>Network</b>.</li>
+                                <li>اضغط على زر الريستارت، أو صفحة الواي فاي المطلوبة.</li>
+                                <li>انسخ المسار الذي يظهر <b>بعد رقم الـ IP</b> في سطر الأوامر.</li>
+                            </ol>
+                            <strong>أو اضغط على أحد المسارات الشائعة للريستارت:</strong>
+                            <ul>
+                                <li>Linksys / Cisco: <span class="copy-badge" onclick="fillPath('reboot-url-${r.id}', 'setup.cgi?todo=reboot')">setup.cgi?todo=reboot</span></li>
+                                <li>TP-Link: <span class="copy-badge" onclick="fillPath('reboot-url-${r.id}', 'userRpm/SysRebootRpm.htm?Reboot=Reboot')">userRpm/SysRebootRpm.htm?Reboot=Reboot</span></li>
+                                <li>D-Link: <span class="copy-badge" onclick="fillPath('reboot-url-${r.id}', 'reboot.cgi')">reboot.cgi</span></li>
+                            </ul>
+                        </div>
+
+                        <div style="margin-top: 10px;">
+                            <button id="btn-save-${r.id}" class="btn-success" style="width: 100%; padding: 10px; font-size: 1rem; display: none;" onclick="updateLocalSettings(${r.id})">💾 حفظ البيانات المحدثة</button>
+                        </div>
+                    </div>
+
+                    <div class="sys-msg" id="msg-${r.id}"></div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleSettings(id) {
+            const panel = document.getElementById(id);
+            panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function updateLocalSettings(id) {
+            const rIndex = routers.findIndex(r => r.id === id);
+            if(rIndex > -1) {
+                routers[rIndex].name = document.getElementById(`local-name-${id}`).value;
+                routers[rIndex].ip = document.getElementById(`local-ip-${id}`).value;
+                routers[rIndex].username = document.getElementById(`user-${id}`).value;
+                routers[rIndex].password = document.getElementById(`pass-${id}`).value;
+                routers[rIndex].rebootUrl = document.getElementById(`reboot-url-${id}`).value;
+                routers[rIndex].wifiUrl = document.getElementById(`wifi-url-${id}`).value; 
+                routers[rIndex].wifiSsid = document.getElementById(`wifi-ssid-${id}`).value; 
+                routers[rIndex].wifiPass = document.getElementById(`wifi-pass-${id}`).value; 
+                
+                saveRouters(); 
+                renderDashboard(); 
+                showToast('✅ تم حفظ الإعدادات بنجاح.', 'success');
+                addLog(`⚙️ تم تعديل وحفظ إعدادات الراوتر: ${routers[rIndex].name}`);
+            }
+        }
+
+        // الاستيراد والتصدير للإعدادات
+        function exportData(event) {
+            event.preventDefault();
+            if (routers.length === 0) { alert("لا توجد بيانات لتصديرها."); return; }
+            const dataStr = JSON.stringify(routers, null, 4); 
+            const blob = new Blob([dataStr], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = "routers_config.txt"; a.click(); URL.revokeObjectURL(url);
+            addLog("💾 تم تصدير إعدادات الراوترات إلى ملف");
+        }
+
+        function triggerImport(event) { 
+            event.preventDefault();
+            document.getElementById('import-file').click(); 
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        routers = imported;
+                        saveRouters(); renderDashboard(); showToast("تم استيراد البيانات بنجاح!", "success");
+                        addLog("📂 تم استيراد إعدادات جديدة من ملف");
+                    } else { alert("صيغة الملف غير صحيحة."); }
+                } catch (error) { alert("حدث خطأ في الملف."); }
+            };
+            reader.readAsText(file); event.target.value = '';
+        }
+
+        window.onload = () => {
+            loadRouters();
+            renderDashboard();
+            addLog("🚀 تم تشغيل اللوحة وبدء المراقبة.");
+        };
+    </script>
+</body>
+</html>
